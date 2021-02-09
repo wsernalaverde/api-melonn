@@ -1,0 +1,31 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "babel-node index.js",
+    "build": "babel src --out-dir dist",
+    "postinstall": "npm run build",
+    "watch": "babel src --out-dir dist --watch"
+  },
+  "author": "wsernalaverde",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "boom": "^7.3.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "moment-timezone": "^0.5.32",
+    "mongoose": "^5.11.15",
+    "node-json-db": "^1.1.0"
+  }
+}
