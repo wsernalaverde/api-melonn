@@ -13,7 +13,7 @@ app.use(cors({
 
 app.use('/', router)
 
-const portDefault = process.env.PORT || 3000
+const portDefault = process.env.PORT || 3001
 
 module.exports = {
   async start (portCustom, host = 'localhost') {

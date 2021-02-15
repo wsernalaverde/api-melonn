@@ -7,7 +7,7 @@ const SellOrderSchema = new Schema({
     required: true
   },
   externalOrderNumber: {
-    type: Number,
+    type: String,
     required: true
   },
   buyerName: {

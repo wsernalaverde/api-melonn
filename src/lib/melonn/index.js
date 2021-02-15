@@ -33,6 +33,22 @@ class Melonn {
       return Promise.reject(e)
     }
   }
+
+  static async getOffDays () {
+    try {
+      const res = await request({
+        url: `${config.melonn.baseUrl}/sandbox/off-days`,
+        method: 'GET',
+        headers: {
+          'x-api-key': `${config.melonn.key}`
+        },
+      })
+
+      return Promise.resolve(res.data)
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
 }
 
 module.exports = Melonn

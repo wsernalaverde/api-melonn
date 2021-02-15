@@ -6,6 +6,7 @@ import Db from '../lib/connection/db'
 import sellOrder from '../lib/models/sellOrder'
 import moment from 'moment-timezone'
 import Melonn from '../lib/melonn'
+import Utils from '../lib/utils'
 
 Db.connect()
 
@@ -22,7 +23,7 @@ router.get('/', (req, res) => res.status(200).json({ ok: 1, app: 'Users', date: 
 router.post('/addSellOrder', async (req, res) => {
   let response = {}
   const body = req.body
-
+  
   try {
     if (!body.store) {
       throw Boom.notFound('seller store not found or invalid')
@@ -32,24 +33,57 @@ router.post('/addSellOrder', async (req, res) => {
       throw Boom.notFound('Shipping Method not found or invalid')
     }
 
-    // if (await sellOrder.findOne({ body.store })) {
-    //   throw Boom.conflict('Store already exists')
-    // }
-
     body.creationDate = moment().format('YYYY-MM-DD, h:mm:ss a')
-
     body.internalOrderNumber = `MSE${moment().unix()}${Math.floor(Math.random() * 100)}`
 
+    const shippingInfo = await Melonn.getShippingMethodById(body.shippingMethod.id)
+    const offDays = await Melonn.getOffDays()
+    const minWeight = shippingInfo.rules.availability.byWeight.min
+    const maxWeight = shippingInfo.rules.availability.byWeight.max
+    let weightOrder = body.lineItems.reduce(((sum, item) => sum + parseInt(item.productWeight)), 0)
+
+    let isBusinessDay = offDays.filter(item => item === moment().format('YYYY-MM-DD'))
+    let nextBusinessDays = await Utils.getNextBusinessDays(10, offDays)
+
+    if (weightOrder >= minWeight && weightOrder <= maxWeight) {
+      // console.log(weightOrder)
+      // console.log('array dias')
+      // console.log(nextBusinessDays)
+      // console.log(isBusinessDay)
+      // console.log(offDays)
+      // console.log(shippingInfo)
+
+      const dayType = shippingInfo.rules.availability.byRequestTime.dayType
+      const fromTimeOfDay = shippingInfo.rules.availability.byRequestTime.fromTimeOfDay
+      const toTimeOfDay = shippingInfo.rules.availability.byRequestTime.toTimeOfDay
+
+      // if (dayType === 'ANY' || (dayType === 'BUSINESS' && isBusinessDay.length <= 0)) {
+      if (dayType === 'ANY' || (dayType === 'BUSINESS' && true)) {
+        let hourNowDatetime = moment().format('HH')
+        console.log(hourNowDatetime)
+        if (hourNowDatetime >= fromTimeOfDay && hourNowDatetime <= toTimeOfDay) {
+          console.log('yes HORA')
+        } else {
+          body['calculateShippings'] = Utils.setShippingNull()
+        }
+      } else {
+        body['calculateShippings'] = Utils.setShippingNull()
+      }
+    } else {
+      body['calculateShippings'] = Utils.setShippingNull()
+    }
+   
     console.log(body)
 
-    const newOrder = new sellOrder(body)
-    let order = await newOrder.save()
+    // const newOrder = new sellOrder(body)
+    // let order = await newOrder.save()
     
     response = {
-      data: { order },
+      data: '{ order }',
       statusCode: 201
     }
   } catch (e) {
+    console.log(e)
     response = e.output ? e.output.payload : { error: e, statusCode: 500 }
   }
 
@@ -75,8 +109,6 @@ router.get('/getOrders', async (req, res) => {
 router.get('/getOrderDetails/:orderId', async (req, res) => {
   let response = {}
   const id = req.params.orderId
-
-  console.log('oe')
 
   try {
     if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
