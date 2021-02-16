@@ -57,12 +57,42 @@ router.post('/addSellOrder', async (req, res) => {
       const fromTimeOfDay = shippingInfo.rules.availability.byRequestTime.fromTimeOfDay
       const toTimeOfDay = shippingInfo.rules.availability.byRequestTime.toTimeOfDay
 
-      // if (dayType === 'ANY' || (dayType === 'BUSINESS' && isBusinessDay.length <= 0)) {
-      if (dayType === 'ANY' || (dayType === 'BUSINESS' && true)) {
+      if (dayType === 'ANY' || (dayType === 'BUSINESS' && isBusinessDay.length <= 0)) {
         let hourNowDatetime = moment().format('HH')
-        console.log(hourNowDatetime)
         if (hourNowDatetime >= fromTimeOfDay && hourNowDatetime <= toTimeOfDay) {
           console.log('yes HORA')
+          const casesPromise = shippingInfo.rules.promisesParameters.cases
+          let priority = 1
+          let controller = true
+          let workingCase = {}
+          while (controller) {
+            let caseData = casesPromise.filter(item => item.priority === priority)
+   
+            if(caseData.length > 0) {
+              const caseDayType = caseData[0].condition.byRequestTime.dayType
+              const caseFromTimeOfDay = caseData[0].condition.byRequestTime.fromTimeOfDay
+              const caseToTimeOfDay = caseData[0].condition.byRequestTime.toTimeOfDay
+   
+              if (caseDayType === 'ANY' || (caseDayType === 'BUSINESS' && isBusinessDay.length <= 0)) {
+
+                if (hourNowDatetime >= caseFromTimeOfDay && hourNowDatetime <= caseToTimeOfDay) {
+                  controller = false
+                  workingCase = caseData[0]
+                } else {
+                  priority++
+                }
+
+              } else {
+                priority++
+              }
+
+            } else {
+              body['calculateShippings'] = Utils.setShippingNull()
+              controller = false
+            }
+          }
+
+          console.log(workingCase)
         } else {
           body['calculateShippings'] = Utils.setShippingNull()
         }
