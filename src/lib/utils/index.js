@@ -40,6 +40,10 @@ class Utils {
     }
   }
 
+  static async validateCase (priority, casesPromise) {
+    let caseData = casesPromise.filter(item => item.priority === priority)
+  }
+
 }
 
 module.exports = Utils

@@ -55,6 +55,10 @@ const SellOrderSchema = new Schema({
   internalOrderNumber: {
     type: String,
     required: true
+  },
+  calculateShippings: {
+    type: Object,
+    required: true
   }
 })
 
