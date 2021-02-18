@@ -20,8 +20,7 @@ const SellOrderSchema = new Schema({
   },
   buyerEmail: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   shippingAddress: {
     type: String,

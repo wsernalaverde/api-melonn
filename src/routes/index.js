@@ -33,7 +33,7 @@ router.post('/addSellOrder', async (req, res) => {
       throw Boom.notFound('Shipping Method not found or invalid')
     }
 
-    body.creationDate = moment().format('YYYY-MM-DD, h:mm:ss a')
+    body.creationDate = moment().format('YYYY-MM-DD')
     body.internalOrderNumber = `MSE${moment().unix()}${Math.floor(Math.random() * 100)}`
     body['calculateShippings'] = {}
 
